@@ -1,0 +1,13 @@
+services:
+  mysqldb:
+    container_name: mysqldb
+    image: mysql:8.0.42-debian
+    env_file: ./.env
+    ports:
+      - $MYSQL_PORT:$MYSQL_PORT
+#    volumes:
+#      - db:/var/lib/mysql
+#    restart: unless-stopped
+
+#volumes:
+#  db:
