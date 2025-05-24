@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import db from "./app/models/index.js";
 import authRoutes from "./app/routes/auth.routes.js";
 import userRoutes from "./app/routes/user.routes.js";
+import helmet from "helmet";
 
 const app = express();
 
@@ -16,6 +17,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // разбор запросов с типом содержимого - application/x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}));
+/*
+ Для защиты вашего приложения, таких как контроль над заголовками HTTP,
+ предотвращение атак межсайтового скриптинга (XSS) и подделки межсайтовых
+ запросов (CSRF), а также защиту от других уязвимостей безопасности.
+ */
+app.use(helmet());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/test", userRoutes);
