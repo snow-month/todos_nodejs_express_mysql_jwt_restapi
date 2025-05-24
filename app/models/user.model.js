@@ -5,7 +5,7 @@
    строки в таблице.
  */
 export default (sequelize, Sequelize) => {
-    return sequelize.define("users", {
+    return sequelize.define("user", {
         username: {
             type: Sequelize.STRING,
             unique: true,

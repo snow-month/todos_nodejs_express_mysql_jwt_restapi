@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from "cors";
-import db from "./app/models/index.js";
 import {configDotenv} from "dotenv";
+import bcrypt from "bcryptjs";
+import db from "./app/models/index.js";
+import authRoutes from "./app/routes/auth.routes.js";
+import userRoutes from "./app/routes/user.routes.js";
 
 const app = express();
 
@@ -14,24 +17,46 @@ app.use(express.json());
 // разбор запросов с типом содержимого - application/x-www-form-urlencoded
 app.use(express.urlencoded({extended: true}));
 
-app.get('/', (req, res) => {
-    res.json({message: 'Welcome to the server!'});
-})
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/test", userRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/test", userRoutes);
 
 // используем process.env для установки порта
 configDotenv();
 const PORT = process.env.APP_PORT || 8080;
 
 // синхронизация с бд, после успешной синхронизации запускаем сервер
-db.sequelize.sync({force: false})
+// {force: true} существующие таблицы будут перезаписаны
+db.sequelize.sync({force: true})
     .then(() => {
         console.log("Database synchronized");
+        initial();
         app.listen(PORT, () => {
             console.log(`Listening on port ${PORT}`);
-        })
+        });
     })
     .catch((err) => {
         console.error(err);
     });
+
+async function initial() {
+    const Role = db.role;
+    const roleUser = await Role.create({name: "USER"});
+    const roleAdmin = await Role.create({name: "ADMIN"});
+
+    const User = db.user;
+    const userHashPassword = await bcrypt.hash("user", 10);
+    const user = await User.create({
+        username: "user",
+        email: "user@home.org",
+        password: userHashPassword,
+    });
+    user.setRoles(roleUser);
+
+    const adminHashPassword = await bcrypt.hash("admin", 10);
+    const admin = await User.create({
+        username: "admin",
+        email: "admin@company.com",
+        password: adminHashPassword,
+    });
+    admin.setRoles(roleAdmin);
+}
