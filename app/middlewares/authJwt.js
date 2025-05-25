@@ -12,7 +12,7 @@ export const verifyToken = async (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token.replace("Bearer ", ""), authConfig.secret);
+        const decoded = jwt.verify(token.replace("Bearer ", ""), authConfig.jwtSecret);
         req.userId = decoded.id;
 
         const user = await User.findByPk(req.userId);
@@ -22,6 +22,10 @@ export const verifyToken = async (req, res, next) => {
 
         next();
     } catch (err) {
+        const {TokenExpiredError} = jwt;
+        if (err instanceof TokenExpiredError) {
+            return res.status(401).json({message: "Unauthorized! Access Token was expired!"});
+        }
         return res.status(401).json({message: "Unauthorized!"});
     }
 };
@@ -38,7 +42,7 @@ export const isAdmin = async (req, res, next) => {
         }
 
         res.status(403).json({message: "Require Admin Role!"});
-    } catch (error) {
-        res.status(500).json({message: error.message});
+    } catch (err) {
+        res.status(500).json({message: err.message});
     }
 };

@@ -2,10 +2,10 @@ import express from 'express';
 import cors from "cors";
 import {configDotenv} from "dotenv";
 import bcrypt from "bcryptjs";
+import helmet from "helmet";
 import db from "./app/models/index.js";
 import authRoutes from "./app/routes/auth.routes.js";
 import userRoutes from "./app/routes/user.routes.js";
-import helmet from "helmet";
 
 const app = express();
 
